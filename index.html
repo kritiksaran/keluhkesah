@@ -30,7 +30,7 @@ label {
   display: block;
 }
 
-input, textarea {
+input, textarea, select {
   width: 100%;
   padding: 10px;
   margin-top: 6px;
@@ -115,8 +115,12 @@ button.submit-btn:hover { background: #45a049; }
   <form id="form">
     <input type="text" name="date" id="date" readonly>
 
-    <label>Dear</label>
-    <input type="text" name="dear" required>
+    <label>Dear</label> 
+    <select name="dear" required>
+      <option value="" disabled selected>Dear</option>
+      <option value="Admin">Admin</option>
+      <option value="Editor">Editor</option>
+    </select>
 
     <label>Keluh Kesah</label>
     <textarea name="keluh" rows="3"></textarea>
