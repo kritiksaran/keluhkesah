@@ -77,11 +77,6 @@ button.submit-btn:hover { background: #45a049; }
   background: #0a58ca;
 }
 
-.sort-buttons {
-  text-align: right;
-  margin: 10px 0;
-}
-
 .item {
   background: #fff;
   margin-top: 10px;
@@ -113,7 +108,7 @@ button.submit-btn:hover { background: #45a049; }
   <h2>Form Keluh Kesah</h2>
 
   <form id="form">
-    <input type="text" name="date" id="date" readonly>
+    <input type="hidden" name="date" id="date"> <!-- tanggal otomatis -->
 
     <label>Dear</label> 
     <select name="dear" required>
@@ -141,48 +136,48 @@ button.submit-btn:hover { background: #45a049; }
     <button onclick="showCategory('saran')">Saran</button>
   </div>
 
-  <div class="sort-buttons">
-    <button onclick="sortData('desc')">Terbaru → Lama</button>
-    <button onclick="sortData('asc')">Lama → Terbaru</button>
-  </div>
-
   <div id="list"></div>
   <div id="pagination" style="margin-top:10px; text-align:center;"></div>
 </div>
 
 <script>
-document.getElementById("date").value = new Date().toISOString().slice(0, 10);
-
 const API_URL = "https://script.google.com/macros/s/AKfycbzezBB1V50wcAH0A5jK0L4-lSVMWhpTjg1V5qNMHy7dCaz7fbzUJE17848XkLwf0udf/exec";
 let sheetData = [];
 let currentPage = 1;
 const perPage = 5;
 
 // =========================
-// LOAD DATA (skip header baris pertama)
+// PARSE TANGGAL (aman untuk DD/MM/YYYY atau YYYY-MM-DD)
+function parseDate(str){
+  if(!str) return new Date(0);
+  str = str.trim();
+  if(str.includes("/")){
+    const [d,m,y] = str.split("/");
+    return new Date(y, m-1, d);
+  }
+  return new Date(str);
+}
+
+// =========================
+// LOAD DATA
 async function loadData() {
   const res = await fetch(API_URL);
   const json = await res.json();
+  const dataOnly = json.slice(1); // skip header
 
-  // skip header baris pertama
-  const dataOnly = json.slice(1);
-
-  // sort default terbaru ke lama
-  dataOnly.sort((a,b)=> new Date(b[0]) - new Date(a[0]));
-
+  // sort terbaru → lama
+  dataOnly.sort((a,b) => parseDate(b[0]) - parseDate(a[0]));
   sheetData = dataOnly;
 
-  // otomatis tampil keluh kesah
   currentPage = 1;
   showCategory("keluh");
 }
 loadData();
 
 // =========================
-// FORMAT TANGGAL
+// FORMAT TANGGAL INDONESIA
 function formatDateIndo(dateStr) {
-  if(!dateStr) return "-";
-  const d = new Date(dateStr);
+  const d = parseDate(dateStr);
   if(isNaN(d)) return "-";
   const bulan = ["Januari","Februari","Maret","April","Mei","Juni",
                  "Juli","Agustus","September","Oktober","November","Desember"];
@@ -197,6 +192,14 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
   msg.innerHTML = "Mengirim...";
   msg.style.color = "#333";
 
+  // set tanggal otomatis
+  const dateField = document.getElementById("date");
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  dateField.value = `${yyyy}-${mm}-${dd}`; // YYYY-MM-DD
+
   const formData = new FormData(e.target);
 
   try{
@@ -208,22 +211,19 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
       msg.innerHTML="✔ Data berhasil dikirim!";
 
       const newData = [
-        formData.get("date"),
+        dateField.value,
         formData.get("dear"),
         formData.get("keluh"),
         formData.get("kritik"),
         formData.get("saran")
       ];
 
-      sheetData.unshift(newData); // data baru paling atas
+      sheetData.push(newData);
+      sheetData.sort((a,b)=> parseDate(b[0]) - parseDate(a[0]));
 
       e.target.reset();
-      document.getElementById("date").value = new Date().toISOString().slice(0,10);
-
-      if(window.lastCategory){
-        currentPage = 1;
-        showCategory(window.lastCategory);
-      }
+      currentPage = 1;
+      showCategory(window.lastCategory || "keluh");
 
     }else{
       msg.style.color="red";
@@ -235,18 +235,6 @@ document.getElementById("form").addEventListener("submit", async (e)=>{
     msg.innerHTML="❌ ERROR: "+err;
   }
 });
-
-// =========================
-// SORTING
-function sortData(order){
-  if(order==='desc'){
-    sheetData.sort((a,b)=> new Date(b[0]) - new Date(a[0]));
-  }else{
-    sheetData.sort((a,b)=> new Date(a[0]) - new Date(b[0]));
-  }
-  currentPage = 1;
-  if(window.lastCategory) showCategory(window.lastCategory);
-}
 
 // =========================
 // PAGINATION
