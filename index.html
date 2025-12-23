@@ -1,313 +1,281 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<meta charset="utf-8">
 <title>Form Keluh Kesah</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 20px;
-  background: #f5f5f5;
+body{
+  font-family:system-ui;
+  background:linear-gradient(180deg,#eef2f7,#f8fafc);
+  padding:20px;
 }
 
-.container {
-  max-width: 480px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.container{
+  max-width:520px;
+  margin:auto;
+  background:#fff;
+  padding:22px;
+  border-radius:16px;
+  box-shadow:0 12px 40px rgba(0,0,0,.08);
 }
 
-h2, h3 { text-align: center; }
+h2{text-align:center;margin:0 0 16px}
 
-label {
-  font-weight: bold;
-  margin-top: 12px;
-  display: block;
-}
-
-input, textarea, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-
-button {
-  padding: 6px 10px;
-  margin: 2px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button.submit-btn {
-  width: 100%;
-  background: #4CAF50;
-  color: white;
-  font-size: 17px;
-  padding: 14px;
-  margin-top: 20px;
-}
-
-button.submit-btn:hover { background: #45a049; }
-
-.menu-buttons {
-  display: flex;
-  gap: 5px;
-  margin-top: 30px;
-}
-
-.menu-buttons button {
-  flex: 1;
-  background: #0d6efd;
-  color:white;
+input, select, button{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  margin-bottom:12px;
   font-size:14px;
-  padding:8px 0;
+  box-sizing:border-box; /* 🔑 FIX */
 }
 
-.menu-buttons button:hover {
-  background: #0a58ca;
+
+button{
+  background:#22c55e;
+  color:#fff;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+}
+button:hover{opacity:.9}
+button:disabled{opacity:.6}
+
+#notif{
+  display:none;
+  padding:10px;
+  border-radius:8px;
+  font-size:14px;
+  text-align:center;
+  margin-top:6px;
+}
+#notif.loading{background:#e0f2fe;color:#0369a1}
+#notif.success{background:#dcfce7;color:#166534}
+#notif.error{background:#fee2e2;color:#991b1b}
+
+.item{
+  background:#f9fafb;
+  padding:14px 16px;
+  border-radius:12px;
+  border-left:5px solid #2563eb;
+  margin-bottom:14px;
 }
 
-.item {
-  background: #fff;
-  margin-top: 10px;
-  padding: 10px;
-  border-left: 4px solid #0d6efd;
-  border-radius: 6px;
+.date{
+  font-size:12px;
+  color:#6b7280;
+  margin-bottom:6px;
 }
 
-.date {
-  font-size: 12px;
-  color: #666;
+.pagination{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin-top:14px;
 }
-
-#msg {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 16px;
+.pagination button{
+  width:auto;
+  padding:6px 12px;
+  background:#e5e7eb;
+  color:#111;
 }
-
-#pagination button {
-  font-size: 12px;
-  padding: 5px 8px;
+.pagination button.active{
+  background:#2563eb;
+  color:#fff;
 }
 </style>
 </head>
+
 <body>
-
 <div class="container">
-  <h2>Form Keluh Kesah</h2>
 
-  <form id="form">
-    <input type="hidden" name="date" id="date"> <!-- tanggal otomatis -->
+<h2>Keluh Kesah</h2>
 
-    <label>Dear</label> 
-    <select name="dear" required>
-      <option value="" disabled selected>Dear</option>
-      <option value="Admin">Admin</option>
-      <option value="CEO">CEO</option>
-      <option value="Editor">Editor</option>
-    </select>
+<!-- FORM -->
+<form id="form">
+  <select id="dear" required>
+    <option value="">Dear to</option>
+    <option>Admin</option>
+    <option>Editor</option>
+  </select>
 
-    <label>Keluh Kesah</label>
-    <textarea name="keluh" rows="3"></textarea>
+  <input id="keluh" placeholder="Tulis keluh kesah..." required>
 
-    <label>Kritik</label>
-    <textarea name="kritik" rows="3"></textarea>
+  <button type="submit">Kirim</button>
+  <div id="notif"></div>
+</form>
 
-    <label>Saran</label>
-    <textarea name="saran" rows="3"></textarea>
+<hr style="margin:20px 0">
 
-    <button type="submit" class="submit-btn">Kirim</button>
-  </form>
+<!-- OPEN DATA -->
+<button id="openBtn">🔐 Buka Keluh Kesah</button>
 
-  <p id="msg"></p>
-  <div class="menu-buttons">
-    <button onclick="showCategory('keluh')">Keluh Kesah</button>
-    <button onclick="showCategory('kritik')">Kritik</button>
-    <button onclick="showCategory('saran')">Saran</button>
-  </div>
+<div id="filterBox" style="display:none;margin-top:14px">
+  <select id="filterDear">
+    <option value="ALL">Semua Tujuan</option>
+    <option value="Admin">Admin</option>
+    <option value="Editor">Editor</option>
+  </select>
+</div>
 
-  <div id="list"></div>
-  <div id="pagination" style="margin-top:10px; text-align:center;"></div>
+<div id="list" style="margin-top:16px"></div>
+<div class="pagination" id="pagination"></div>
+
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzezBB1V50wcAH0A5jK0L4-lSVMWhpTjg1V5qNMHy7dCaz7fbzUJE17848XkLwf0udf/exec";
-let sheetData = [];
-let currentPage = 1;
-const perPage = 5;
+const API_URL = "https://script.google.com/macros/s/AKfycbz1Bp1NBD4VI1ujBC2wZcwUfWhbhjmqKMIKDxCfuqfrZt_6qaxb6YWWdJemyus8nH7D/exec";
 
-// =========================
-// PARSE TANGGAL (aman untuk DD/MM/YYYY atau YYYY-MM-DD)
-function parseDate(str){
-  if(!str) return new Date(0);
-  str = str.trim();
-  if(str.includes("/")){
-    const [d,m,y] = str.split("/");
-    return new Date(y, m-1, d);
-  }
-  return new Date(str);
+let data = [];
+let page = 1;
+const limit = 5;
+let opened = false;
+let sessionPassword = "";
+
+/* =====================
+   FORMAT TANGGAL
+===================== */
+function formatDateIndo(v){
+  const d = new Date(v);
+  const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-// =========================
-// LOAD DATA
-async function loadData() {
-  const res = await fetch(API_URL);
-  const json = await res.json();
-  const dataOnly = json.slice(1); // skip header
-
-  // sort terbaru → lama
-  dataOnly.sort((a,b) => parseDate(b[0]) - parseDate(a[0]));
-  sheetData = dataOnly;
-
-  currentPage = 1;
-  showCategory("keluh");
-}
-loadData();
-
-// =========================
-// FORMAT TANGGAL INDONESIA
-function formatDateIndo(dateStr) {
-  const d = parseDate(dateStr);
-  if(isNaN(d)) return "-";
-  const bulan = ["Januari","Februari","Maret","April","Mei","Juni",
-                 "Juli","Agustus","September","Oktober","November","Desember"];
-  return d.getDate() + " " + bulan[d.getMonth()] + " " + d.getFullYear();
-}
-
-// =========================
-// SUBMIT FORM
-document.getElementById("form").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const msg = document.getElementById("msg");
-  msg.innerHTML = "Mengirim...";
-  msg.style.color = "#333";
-
-  // set tanggal otomatis
-  const dateField = document.getElementById("date");
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth()+1).padStart(2,'0');
-  const dd = String(today.getDate()).padStart(2,'0');
-  dateField.value = `${yyyy}-${mm}-${dd}`; // YYYY-MM-DD
-
-  const formData = new FormData(e.target);
-
+/* =====================
+   LOAD DATA
+===================== */
+async function loadData(){
   try{
-    const res = await fetch(API_URL,{method:"POST", body:formData});
+    const res = await fetch(API_URL + "?password=" + encodeURIComponent(sessionPassword));
     const text = await res.text();
 
-    if(text==="OK"){
-      msg.style.color="green";
-      msg.innerHTML="✔ Data berhasil dikirim!";
+    // PASSWORD SALAH
+    if(text === "DENIED" || !text){
+      alert("❌ Password salah");
+      opened = false;
+      sessionPassword = "";
+      filterBox.style.display = "none";
+      return;
+    }
 
-      const newData = [
-        dateField.value,
-        formData.get("dear"),
-        formData.get("keluh"),
-        formData.get("kritik"),
-        formData.get("saran")
-      ];
+    const json = JSON.parse(text);
+    data = json.slice(1).sort((a,b)=>new Date(b[0])-new Date(a[0]));
+    render();
+  }catch(e){
+    alert("❌ Gagal memuat data");
+    opened = false;
+    sessionPassword = "";
+  }
+}
 
-      sheetData.push(newData);
-      sheetData.sort((a,b)=> parseDate(b[0]) - parseDate(a[0]));
+/* =====================
+   RENDER
+===================== */
+function render(){
+  list.innerHTML = "";
 
-      e.target.reset();
-      currentPage = 1;
-      showCategory(window.lastCategory || "keluh");
+  let filtered = data;
+  if(filterDear.value !== "ALL"){
+    filtered = data.filter(r=>r[1]===filterDear.value);
+  }
 
+  const start = (page-1)*limit;
+  const chunk = filtered.slice(start,start+limit);
+
+  chunk.forEach(r=>{
+    list.innerHTML += `
+      <div class="item">
+        <div class="date">${formatDateIndo(r[0])}</div>
+        <b>To ${r[1]},</b>
+        ${r[2]}
+      </div>
+    `;
+  });
+
+  renderPagination(filtered.length);
+}
+
+function renderPagination(total){
+  pagination.innerHTML="";
+  const pages = Math.ceil(total/limit);
+  for(let i=1;i<=pages;i++){
+    pagination.innerHTML+=`
+      <button class="${i===page?'active':''}" onclick="go(${i})">${i}</button>
+    `;
+  }
+}
+function go(p){
+  page=p;
+  render();
+}
+
+/* =====================
+   OPEN DATA
+===================== */
+openBtn.onclick = ()=>{
+  if(opened) return;
+
+  const pw = prompt("Masukkan password:");
+  if(!pw) return;
+
+  sessionPassword = pw;
+  opened = true;
+  filterBox.style.display = "block";
+  loadData();
+};
+
+/* =====================
+   FILTER
+===================== */
+filterDear.onchange = ()=>{
+  page = 1;
+  render();
+};
+
+/* =====================
+   SUBMIT FORM
+===================== */
+form.onsubmit = async e=>{
+  e.preventDefault();
+
+  notif.style.display="block";
+  notif.className="loading";
+  notif.innerHTML="⏳ Mengirim data...";
+
+  try{
+    const res = await fetch(API_URL,{
+      method:"POST",
+      body:JSON.stringify({
+        password: sessionPassword,
+        date:new Date().toISOString(),
+        dear:dear.value,
+        keluh:keluh.value
+      })
+    });
+
+    const text = await res.text();
+
+    if(text === "OK"){
+      notif.className="success";
+      notif.innerHTML="✅ Data berhasil dikirim";
+      form.reset();
+
+      if(opened) loadData();
+      setTimeout(()=>notif.style.display="none",2500);
     }else{
-      msg.style.color="red";
-      msg.innerHTML="❌ Gagal mengirim: "+text;
+      notif.style.display="none";
+      alert("❌ Gagal mengirim data");
     }
-
-  }catch(err){
-    msg.style.color="red";
-    msg.innerHTML="❌ ERROR: "+err;
+  }catch{
+    notif.style.display="none";
+    alert("❌ Koneksi error");
   }
-});
-
-// =========================
-// PAGINATION
-function renderPagination(totalPages){
-  const pagination = document.getElementById("pagination");
-  pagination.innerHTML="";
-
-  if(totalPages<=1) return;
-
-  if(currentPage>1){
-    pagination.innerHTML+=`<button onclick="gotoPage(${currentPage-1})">Prev</button>`;
-  }
-
-  for(let i=1;i<=totalPages;i++){
-    pagination.innerHTML+=`<button onclick="gotoPage(${i})" style="${i===currentPage?'background:#0d6efd;color:white;':''}">${i}</button>`;
-  }
-
-  if(currentPage<totalPages){
-    pagination.innerHTML+=`<button onclick="gotoPage(${currentPage+1})">Next</button>`;
-  }
-}
-
-function gotoPage(page){
-  currentPage=page;
-  showCategory(window.lastCategory);
-}
-
-// =========================
-// SHOW CATEGORY
-function showCategory(cat){
-  window.lastCategory=cat;
-
-  const list=document.getElementById("list");
-  const pagination=document.getElementById("pagination");
-
-  list.innerHTML="<p>Memuat data...</p>";
-  pagination.innerHTML="";
-
-  setTimeout(()=>{
-    list.innerHTML="";
-
-    const filtered = sheetData.filter(row=>{
-      const field = cat==="keluh"?row[2]:cat==="kritik"?row[3]:row[4];
-      return field && field.trim()!=="";
-    });
-
-    const totalPages = Math.ceil(filtered.length/perPage);
-    const start = (currentPage-1)*perPage;
-    const end = start+perPage;
-    const pageItems = filtered.slice(start,end);
-
-    pageItems.forEach(row=>{
-      const field = cat==="keluh"?row[2]:cat==="kritik"?row[3]:row[4];
-      list.innerHTML+=`
-        <div class="item">
-          <div><strong>To ${row[1]},</strong></div>
-          <div class="date">${formatDateIndo(row[0])}</div>
-          <div style="margin-top:6px;">${field}</div>
-        </div>
-      `;
-    });
-
-    if(pageItems.length===0){
-      list.innerHTML="<p>Tidak ada data.</p>";
-    }
-
-    renderPagination(totalPages);
-
-  },100);
-}
+};
 </script>
+
 
 </body>
 </html>
-
